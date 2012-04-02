@@ -71,4 +71,4 @@ if __name__ == '__main__':
     aws.start_instance()
     print "Waiting for instance to boot..."
     time.sleep(120)
-    aws.run_tasks(['lampcms'])
+    aws.run_tasks(['update_packages','setup_python','lampcms'])
