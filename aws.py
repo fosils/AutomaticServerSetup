@@ -13,8 +13,8 @@ class aws_tool(object):
     '''
     groupname = 'def-generated-group'
     groupdesc = 'Default security group with ssh and http access.'
-    key_directory = '/home/raczman/aws/keypairs/'
-    scripts_dir = '/home/raczman/aws/scripts/'
+    key_directory = './'
+    scripts_dir = './scripts/'
     instance_size = 't1.micro'
     ami_name = 'ami-973b06e3'
 
