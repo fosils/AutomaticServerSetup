@@ -5,5 +5,5 @@ from fabric.contrib import files as cn
 
 def run(aws):
     with cm.cd('~/'):
-        cn.upload_template(aws.scripts_dir+'lampcms.sh', '~/lampcms.sh',context={'hostname':aws.reservation.public_dns_name},mirror_local_mode=True)
+        cn.upload_template(aws.scripts_dir+'scripts/lampcms.sh', '~/lampcms.sh',context={'hostname':aws.reservation.public_dns_name},mirror_local_mode=True)
         op.run('sudo bash ./lampcms.sh')
