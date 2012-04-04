@@ -2,6 +2,7 @@ import os, time
 import base64
 import boto.ec2
 import fabric.api
+import sys
 
 aws_key_id=''
 aws_secret=''
@@ -67,6 +68,11 @@ class aws_tool(object):
         return base64.urlsafe_b64encode(os.urandom(count))
 
 if __name__ == '__main__':
+    if len(sys.argv) != 3:  # the program name and the two arguments
+        # stop the program and print an error message
+        sys.exit("You must provide two parameters: AWS Key ID and AWS Secret Key")
+    aws_key_id = sys.argv[1]
+    aws_secret = sys.argv[2]
     aws = aws_tool(aws_key_id, aws_secret, region)
     aws.start_instance()
     print "Waiting for instance to boot..."
