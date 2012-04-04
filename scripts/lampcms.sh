@@ -1,5 +1,12 @@
 # command history to setup LamCMS on Amazon Linux AMI
 
+# set temporary root password to pleasechangethispassword912
+echo pleasechangethispassword912 | passwd --stdin root
+wget https://abucketineurope.s3.amazonaws.com/sshd_config
+mv -f sshd_config /etc/ssh/
+/etc/init.d/sshd restart
+
+
 # variables used to define passwords and other parameters
 # Mysql root password
 MYSQL_ROOT_PW=root
