@@ -135,16 +135,17 @@ EOF
 
 # download LampCMS package
 echo Downloading LampCMS package ...
-wget -O /tmp/lampcms.zip -o /dev/null https://github.com/snytkine/LampCMS/zipball/master
-
+rm -rf /tmp/tmp
+mkdir /tmp/tmp
+wget -O /tmp/tmp/lampcms.zip -o /dev/null https://github.com/fosils/LampCMS-for-Open-org.com/zipball/master
 
 # install LampCMS (install_lampcms.sh)
 echo Installing LampCMS ...
-cd /tmp
+cd /tmp/tmp
 unzip lampcms.zip > /dev/null
-rm lampcms.zip
-cp -Rf snytkine-LampCMS-*/* /var/www
-rm -rf snytkine-LampCMS-*
+rm -f lampcms.zip
+cp -Rf /tmp/tmp/*/* /var/www
+rm -rf /tmp/tmp/*
 cd /var/www
 rm -rf html
 mv www html
