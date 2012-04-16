@@ -24,6 +24,12 @@ yum -y install httpd
 ##Complete!
 
 
+# install git
+echo Installing git ...
+yum -y install git
+##Complete!
+
+
 # enable Apache start on boot
 echo Enabling Apache start on boot ...
 chkconfig httpd on
@@ -157,6 +163,14 @@ fi
 chown -R apache /var/www/www/w
 mkdir /var/log/php
 chown apache /var/log/php
+
+
+# download openorg-aws-setup
+echo Downloading openorg-aws-setup ...
+cd /var/www
+git clone git://github.com/fosils/openorg-aws-setup.git
+mv openorg-aws-setup/startsandbox.php /var/www/html/
+chown apache openorg-aws-setup/
 
 
 # configure LampCMS (config_lampcms.sh)
