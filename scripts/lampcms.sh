@@ -18,6 +18,16 @@ ADMIN_EMAIL=root@lampcms.net
 # server URL without http://
 SITE_HOST_NAME=%(hostname)s
 
+# check architecture
+echo Checking Architecture ...
+ARCH=`/bin/arch`
+if [ "$ARCH" != x86_64 -a "$ARCH" != i686 ]
+then
+    echo "Unknown architecture: '$ARCH'"
+    exit 1
+fi
+
+
 # install Apache
 echo Installing Apache ...
 yum -y install httpd
@@ -51,7 +61,7 @@ yum -y install php php-devel php-mbstring php-pecl-apc php-pecl-oauth php-gd php
 echo Configuring MongoDB repository Yum ...
 echo [10gen] >> /etc/yum.repos.d/10gen.repo
 echo name=10gen Repository >> /etc/yum.repos.d/10gen.repo
-echo baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/i686 >> /etc/yum.repos.d/10gen.repo
+echo baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/$ARCH >> /etc/yum.repos.d/10gen.repo
 echo gpgcheck=0 >> /etc/yum.repos.d/10gen.repo
 
 
