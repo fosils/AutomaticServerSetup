@@ -1,15 +1,7 @@
+#!/bin/bash
 # command history to setup LamCMS on Amazon Linux AMI
 
-# set temporary root password to pleasechangethispassword912
-echo pleasechangethispassword912 | passwd --stdin root
-wget https://abucketineurope.s3.amazonaws.com/sshd_config
-mv -f sshd_config /etc/ssh/
-/etc/init.d/sshd restart
-
-
 # variables used to define passwords and other parameters
-# Mysql root password
-MYSQL_ROOT_PW=root
 # username and password to connect LampCMS database
 MYSQL_LAMP_USER=root
 MYSQL_LAMP_PW=root_pwd
@@ -18,28 +10,15 @@ ADMIN_EMAIL=root@lampcms.net
 # server URL without http://
 SITE_HOST_NAME=%(hostname)s
 
-# install Apache
-echo Installing Apache ...
-yum -y install httpd
-##Complete!
 
-
-# enable Apache start on boot
-echo Enabling Apache start on boot ...
-chkconfig httpd on
-
-
-# start Apache
-echo Starting Apache ...
-service httpd start
-##Starting httpd:                                            [  OK  ]
-
-
-# install PHP
-echo Installing PHP and modules ...
-yum -y install php php-devel php-mbstring php-pecl-apc php-pecl-oauth php-gd php-xml re2c
-##Complete!
-
+# create LampCMS database in Mysql
+echo Creating LampCMS database ...
+mysql -u root mysql --password=$MYSQL_ROOT_PW <<EOF
+create database LAMPCMS;
+create user $MYSQL_LAMP_USER identified by '$MYSQL_LAMP_PW';
+grant all privileges on LAMPCMS.* to $MYSQL_LAMP_USER with grant option;
+quit
+EOF
 
 # configure Yum repository to install MongoDB
 echo Configuring MongoDB repository Yum ...
@@ -67,86 +46,19 @@ service mongod start
 ##Starting mongod:                                           [  OK  ]
 
 
-# install GCC compiler and Make
-echo Installing GCC compiler ...
-yum -y install gcc make
-##Complete!
+#install pecl extension mongoDB
+pecl install mongo
 
-
-# download MongoDB driver for PHP
-echo Downloading MongoDB driver for PHP ...
-wget -O /tmp/mongo-.tgz -o /dev/null http://pecl.php.net/get/mongo
-
-
-# install MongoDB driver for PHP (install_mongo_php.sh)
-echo Installing MongoDB driver for PHP ...
-cd /tmp
-tar xf mongo-.tgz
-cd /tmp/mongo-*
-phpize
-./configure
-make
-make install
-echo -e "; Enable mongo extension module\nextension=mongo.so" > /etc/php.d/mongo.ini
-cd /tmp
-rm -rf /tmp/mongo-*
-
-
-# install Mysql
-echo Installing Mysql ...
-yum -y install mysql-server
-##Complete!
-
-
-# enable Mysql start on boot
-echo Enabling Mysql start on boot ...
-chkconfig mysqld on
-
-
-# start Mysql
-echo Starting Mysql ...
-service mysqld start
-##Starting mysqld:                                           [  OK  ]
-
-
-# secure Mysql
-echo Securing Mysql ...
-/usr/bin/mysql_secure_installation <<EOF
-COMMANDS
-
-Y
-$MYSQL_ROOT_PW
-$MYSQL_ROOT_PW
-Y
-Y
-Y
-Y
-COMMANDS
-EOF
-
-# create LampCMS database in Mysql
-echo Creating LampCMS database ...
-mysql -u root mysql --password=$MYSQL_ROOT_PW <<EOF
-create database LAMPCMS;
-create user $MYSQL_LAMP_USER identified by '$MYSQL_LAMP_PW';
-grant all privileges on LAMPCMS.* to $MYSQL_LAMP_USER with grant option;
-quit
-EOF
 
 # download LampCMS package
+cd /var/www
 echo Downloading LampCMS package ...
-rm -rf /tmp/tmp
-mkdir /tmp/tmp
-wget -O /tmp/tmp/lampcms.zip -o /dev/null https://github.com/fosils/LampCMS-for-Open-org.com/zipball/master
+wget -qO - https://github.com/fosils/LampCMS-for-Open-org.com/tarball/master | tar -xz
 
 # install LampCMS (install_lampcms.sh)
-echo Installing LampCMS ...
-cd /tmp/tmp
-unzip lampcms.zip > /dev/null
-rm -f lampcms.zip
-cp -Rf /tmp/tmp/*/* /var/www
-rm -rf /tmp/tmp/*
-cd /var/www
+echo Installing LampCMS
+mv -f fosils-LampCMS-*/* ./
+rmdir fosils-LampCMS-*
 rm -rf html
 mv www html
 ln -s html www
@@ -168,41 +80,26 @@ mv -f acl.ini.dist acl.ini
 mv -f Points.php.dist Points.php
 mv -f Mycollections.php.dist Mycollections.php
 
-sed "s/TCP_Port_number=/TCP_Port_number=3306/" \!config.ini > config.new
-mv -f config.new \!config.ini
-sed "s/Database_username=/Database_username=$MYSQL_LAMP_USER/" \!config.ini > config.new
-mv -f config.new \!config.ini
-sed "s/Database_password=/Database_password=$MYSQL_LAMP_PW/" \!config.ini > config.new
-mv -f config.new \!config.ini
-sed "s/DEBUG = true/DEBUG = false/" \!config.ini > config.new
-mv -f config.new \!config.ini
-sed "s/EMAIL_ADMIN = \"me@me.me\"/EMAIL_ADMIN= \"$ADMIN_EMAIL\"/" \!config.ini > config.new
-mv -f config.new \!config.ini
-sed "s/EMAIL_DEVELOPER = \"me@me.me\"/EMAIL_DEVELOPER = \"$ADMIN_EMAIL\"/" \!config.ini > config.new
-mv -f config.new \!config.ini
-sed "s/SITE_URL=\"http:\/\/localhost\"/SITE_URL=\"http:\/\/$SITE_HOST_NAME\"/" \!config.ini > config.new
-mv -f config.new \!config.ini
-sed "s/LOG_FILE_PATH = php.log/LOG_FILE_PATH = \/var\/log\/php\/php.log/" \!config.ini > config.new
-mv -f config.new \!config.ini
-sed "s/LOG_FILE_PATH_CGI = cgiphp.log/LOG_FILE_PATH_CGI = \/var\/log\/php\/cgiphp.log/" \!config.ini > config.new
-mv -f config.new \!config.ini
-sed "s/LAMPCMS_PATH =\"\/\"/LAMPCMS_PATH =\"\/var\/www\"/" \!config.ini > config.new
-mv -f config.new \!config.ini
-sed "s/LAMPCMS_DATA_DIR =/LAMPCMS_DATA_DIR =\"\/var\/www\/html\/w\"/" \!config.ini > config.new
-mv -f config.new \!config.ini
-sed "s/CATEGORIES = 2/CATEGORIES = 1/" \!config.ini > config.new
-mv -f config.new \!config.ini
-sed "s/;twitter/twitter/" \!config.ini > config.new
-mv -f config.new \!config.ini
-sed "s/;facebook/facebook/" \!config.ini > config.new
-mv -f config.new \!config.ini
-sed "s/;linkedin/linkedin/" \!config.ini > config.new
+cat \!config.ini | \
+	sed "s/TCP_Port_number=/TCP_Port_number=3306/" | \
+	sed "s/Database_username=/Database_username=$MYSQL_LAMP_USER/" | \
+	sed "s/Database_password=/Database_password=$MYSQL_LAMP_PW/" | \
+	sed "s/DEBUG = true/DEBUG = false/" | \
+	sed "s/EMAIL_ADMIN = \"me@me.me\"/EMAIL_ADMIN= \"$ADMIN_EMAIL\"/" | \
+	sed "s/EMAIL_DEVELOPER = \"me@me.me\"/EMAIL_DEVELOPER = \"$ADMIN_EMAIL\"/" | \
+	sed "s/SITE_URL=\"http:\/\/localhost\"/SITE_URL=\"http:\/\/$SITE_HOST_NAME\"/" | \
+	sed "s/LOG_FILE_PATH = php.log/LOG_FILE_PATH = \/var\/log\/php\/php.log/" | \
+	sed "s/LOG_FILE_PATH_CGI = cgiphp.log/LOG_FILE_PATH_CGI = \/var\/log\/php\/cgiphp.log/" | \
+	sed "s/LAMPCMS_PATH =\"\/\"/LAMPCMS_PATH =\"\/var\/www\"/" | \
+	sed "s/LAMPCMS_DATA_DIR =/LAMPCMS_DATA_DIR =\"\/var\/www\/html\/w\"/" | \
+	sed "s/CATEGORIES = 2/CATEGORIES = 1/" | \
+	sed "s/;twitter/twitter/" | \
+	sed "s/;facebook/facebook/" | \
+	sed "s/;linkedin/linkedin/" > config.new
 mv -f config.new \!config.ini
 sed "s/# RewriteEngine on/RewriteEngine on/" RewriteRules.txt > /etc/httpd/conf.d/lampcms.conf
 
-
 # restart Apache
 echo Restarting Apache ...
-service httpd restart
+service httpd restart#
 ##Starting httpd:                                            [  OK  ]
-

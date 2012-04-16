@@ -68,13 +68,22 @@ class aws_tool(object):
         return base64.urlsafe_b64encode(os.urandom(count))
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:  # the program name and the two arguments
+    argc = len(sys.argv)
+    if argc == 3:
+        #using lampcms as the default package
+        installPkg = 'lampcms'
+    elif argc == 4:
+        installPkg = sys.argv[3]
+    else: # the program name and the two arguments
         # stop the program and print an error message
         sys.exit("You must provide two parameters: AWS Key ID and AWS Secret Key")
-    aws_key_id = sys.argv[1]
-    aws_secret = sys.argv[2]
-    aws = aws_tool(aws_key_id, aws_secret, region)
-    aws.start_instance()
-    print "Waiting for instance to boot..."
-    time.sleep(120)
-    aws.run_tasks(['update_packages','setup_python','lampcms'])
+    if installPkg in ['lampcms', 'QandA']:
+        aws_key_id = sys.argv[1]
+        aws_secret = sys.argv[2]
+        aws = aws_tool(aws_key_id, aws_secret, region)
+        aws.start_instance()
+        print "Waiting for instance to boot..."
+        time.sleep(120)
+        aws.run_tasks(['update_packages','setup_python','ssh', 'apache', 'php', 'mysql', installPkg])
+    else:
+        sys.exit("Install package name must be one of 'lampcms' or 'QandA'")
