@@ -17,7 +17,7 @@ class aws_tool(object):
     key_directory = './'
     scripts_dir = './scripts/'
     instance_size = 't1.micro'
-    ami_name = 'ami-973b06e3'
+    ami_name = 'ami-fd231b89'
 
     def __init__(self, aws_key, aws_secret, region):
         self.aws_key = aws_key
