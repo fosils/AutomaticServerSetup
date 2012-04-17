@@ -2,11 +2,34 @@ import os, time
 import base64
 import boto.ec2
 import fabric.api
+import string
 import sys
 
-aws_key_id=''
-aws_secret=''
-region='eu-west-1'
+from optparse import OptionParser
+
+# default passwords and other parameters - can override with command line parameters,
+# for example:
+#    aws.py --mysql-root-pw=fred --admin_email=someone@somewhere.com ABCDEFG werwer+werwer
+#
+# specify --host and --keyfile to connect to an existing instance rather than making a new one
+#
+#    aws.py -h		will show all available command line parameters
+
+# Mysql root password
+mysql_root_pw = 'root'
+
+# username and password to connect LampCMS database
+mysql_lamp_user = 'root'
+mysql_lamp_pw = 'root_pwd'
+
+# LampCMS administrator email
+admin_email = 'root@lampcms.net'
+
+host = ''
+keyfile = ''
+aws_key_id = ''
+aws_secret = ''
+region = 'eu-west-1'
 
 class aws_tool(object):
     '''
@@ -19,14 +42,37 @@ class aws_tool(object):
     instance_size = 't1.micro'
     ami_name = 'ami-f9231b8d' # Amazon Linux AMI 2012.03, x86_64
 
-    def __init__(self, aws_key, aws_secret, region):
-        self.aws_key = aws_key
-        self.aws_secret = aws_secret
+    def __init__(self, region):
+        self.parse_options()
+        self.aws_key = self.args[0]
+        self.aws_secret = self.args[1]
         self.region = region
+        self.tasks = {}
         
         self.ec2 = boto.ec2.connect_to_region(region,
                                               aws_access_key_id=self.aws_key,
                                               aws_secret_access_key=self.aws_secret)
+
+    def parse_options(self):
+        parser = OptionParser()
+        parser.add_option("--host", default = host)
+        parser.add_option("--keyfile", default = keyfile)
+        parser.add_option("--mysql-root-pw", default = mysql_root_pw)
+        parser.add_option("--mysql-lamp-user", default = mysql_lamp_user)
+        parser.add_option("--mysql-lamp-pw", default = mysql_lamp_pw)
+        parser.add_option("--admin-email", default = admin_email)
+        parser.add_option("--task", action = "append")
+        (self.options, self.args) = parser.parse_args()
+
+        if len(self.args) != 2:  # we need the two keys
+            # stop the program and print an error message
+            sys.exit("You must provide two parameters: AWS Key ID and AWS Secret Key")
+
+    def random_letters(self, count):
+        return base64.urlsafe_b64encode(os.urandom(count))
+
+    def gen_key_prefix(self):
+        return self.random_letters(6)
 
     def generate_key(self):
         self.keyname = 'generated-key-%s' % self.gen_key_prefix()
@@ -53,28 +99,40 @@ class aws_tool(object):
         while self.reservation.update() != u'running':
             time.sleep(1)
         print 'AWS instance set up at', self.reservation.public_dns_name        
+        self.hostname = self.reservation.public_dns_name
         fabric.api.env.host_string = 'ec2-user@%s' % self.reservation.public_dns_name
         fabric.api.env.key_filename = self.key_directory + self.keyname +'.pem'
+        aws.run_task('wait_for_boot')
 
-    def run_tasks(self, tasks):
-        for t in tasks:
-            a = __import__('tasks.%s' % (t),None,None,'run')
+    def use_existing_instance(self, host_string, key_filename):
+        # if they included the 'ec2-user@' prefix, remove it
+        host_string = string.split(host_string, '@')[-1]
+        fabric.api.env.host_string = 'ec2-user@%s' % host_string
+        fabric.api.env.key_filename = self.key_directory + key_filename
+        self.hostname = host_string
+        
+    def run_task(self, task, force = False):
+        # only run each task once, unless force==True
+        if (force or not self.tasks.has_key(task)):
+            self.tasks[task] = True
+            a = __import__('tasks.%s' % (task),None,None,'run')
             a.run(self)
+        else:
+            print "skipping task '%s' because it was already run" % task
 
-    def gen_key_prefix(self):
-        return self.random_letters(6)
-
-    def random_letters(self, count):
-        return base64.urlsafe_b64encode(os.urandom(count))
+    def run_tasks(self, tasks, force = False):
+        for task in tasks:
+            self.run_task(task, force)
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:  # the program name and the two arguments
-        # stop the program and print an error message
-        sys.exit("You must provide two parameters: AWS Key ID and AWS Secret Key")
-    aws_key_id = sys.argv[1]
-    aws_secret = sys.argv[2]
-    aws = aws_tool(aws_key_id, aws_secret, region)
-    aws.start_instance()
-    print "Waiting for instance to boot..."
-    time.sleep(120)
-    aws.run_tasks(['update_packages','setup_python','lampcms'])
+    aws = aws_tool(region)
+
+    if (aws.options.host and aws.options.keyfile):
+        aws.use_existing_instance(aws.options.host, aws.options.keyfile)
+    else:
+        aws.start_instance()
+
+    if (aws.options.task):
+        aws.run_tasks(aws.options.task)
+    else:
+        aws.run_tasks(['lampcms', 'qanda'])
