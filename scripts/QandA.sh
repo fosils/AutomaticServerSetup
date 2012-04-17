@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # download QandA package
-cd /var/www
+cd /var/www/html
 echo Downloading QandA package ...
 wget -qO - https://github.com/dkode/QA-website/tarball/master | tar -xz
 
