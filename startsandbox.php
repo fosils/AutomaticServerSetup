@@ -2,8 +2,8 @@
 function show_form() {
 ?>
 <ul>
-<li><a href="http://forum.open-org.com/q293/How-to-start-using-EC2">Learn how to sign up with Amazon Web Services</a>
-<li><a href="https://aws-portal.amazon.com/gp/aws/securityCredentials">Find your AWS keys here</a>
+<li><a target="_blank" href="http://forum.open-org.com/q293/How-to-start-using-EC2">Learn how to sign up with Amazon Web Services</a>
+<li><a target="_blank" href="https://aws-portal.amazon.com/gp/aws/securityCredentials">Find your AWS keys here</a>
 </ul>
 
 <form method="post">
