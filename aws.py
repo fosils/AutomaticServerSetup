@@ -19,8 +19,8 @@ from optparse import OptionParser
 mysql_root_pw = 'root'
 
 # username and password to connect LampCMS database
-mysql_lamp_user = 'root'
-mysql_lamp_pw = 'root_pwd'
+mysql_lamp_user = 'lampcms'
+mysql_lamp_pw   = 'lampcms_pass'
 
 # LampCMS administrator email
 admin_email = 'root@lampcms.net'
