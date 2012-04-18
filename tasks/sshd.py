@@ -3,7 +3,7 @@ from fabric import context_managers as cm
 
 def run(aws):
     # set temporary root password to pleasechangethispassword912
-    op.run("echo pleasechangethispassword912 | sudo passwd --stdin root")
+    op.run("echo '" + aws.options.aws_root_pw + "' | sudo passwd --stdin root")
 
     # install modified sshd_config
     with cm.cd('~/'):
