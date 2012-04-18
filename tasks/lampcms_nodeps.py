@@ -82,7 +82,5 @@ def run(aws):
     replace_in_config_ini('EMAIL_ADMIN = "me@me.me"',       'EMAIL_ADMIN = "' + aws.options.admin_email + '"')
     replace_in_config_ini('^CATEGORIES = ',                 'CATEGORIES = ')
     replace_in_config_ini(';twitter',                       'twitter')
-    replace_in_config_ini(';facebook',                      'facebook')
-    replace_in_config_ini(';linkedin',                      'linkedin')
 
     op.run('sed "s/# RewriteEngine on/RewriteEngine on/" /var/www/RewriteRules.txt | sudo tee /etc/httpd/conf.d/lampcms.conf > /dev/null')
