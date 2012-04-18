@@ -8,12 +8,17 @@ def replace_in_config_ini(before, after):
     replace_in_file('/var/www/!config.ini', before, after)
 
 def run(aws):
+    # install pdo_mysql PHP extension if it isn't already installed (lib* because it's either in /usr/lib/ or /usr/lib64/)
+    op.run('sudo yum -y install mysql-devel php-pdo')
+    op.run('[ -f /usr/lib*/php/modules/pdo_mysql.so ] || sudo pecl install pdo_mysql')
+    op.run('echo "extension=pdo_mysql.so" | sudo tee /etc/php.d/pdo_mysql.ini > /dev/null')
+
     # create LampCMS database in Mysql
     op.run('echo Creating LampCMS database ...')
     input = ('create database LAMPCMS; ' +
              'create user ' + aws.options.mysql_lamp_user + ' identified by "' + aws.options.mysql_lamp_pw + '"; ' +
              'grant all privileges on LAMPCMS.* to ' + aws.options.mysql_lamp_user + ' with grant option; ')
-    op.run('echo \'' + input + '\' | mysql -u root mysql --password=' + aws.options.mysql_root_pw)
+    op.run('echo \'' + input + '\' | mysql -u root mysql --password=' + aws.options.mysql_root_pw + ' || true')
 
     # download LampCMS package
     op.run('echo Downloading LampCMS package ...')
@@ -52,6 +57,17 @@ def run(aws):
         op.run('sudo mv -f acl.ini.dist acl.ini')
         op.run('sudo mv -f Points.php.dist Points.php')
         op.run('sudo mv -f Mycollections.php.dist Mycollections.php')
+
+    # create the MySQL table, since the LampCMS code doesn't seem to be able to
+    with cm.cd('/var/www/lib/Lampcms/Modules/Search/'):
+        op.run("php -r 'require \"TitleTagsTable.php\"; " +
+               "        $x = new Lampcms\Modules\Search\TitleTagsTable(); " +
+               "        print $x::SQL;' | " +
+               "mysql -u " + aws.options.mysql_lamp_user + " LAMPCMS --password=" + aws.options.mysql_lamp_pw + " || true")
+
+    # work around a bug that expects TitleTagsTable.php to be in the wrong place
+    # (not needed if we're creating the table here)
+    # op.run("sudo ln -s Modules/Search/TitleTagsTable.php /var/www/lib/Lampcms/")
 
     replace_in_config_ini('TCP_Port_number=',               'TCP_Port_number=3306')
     replace_in_config_ini('Database_username=',             'Database_username=' + aws.options.mysql_lamp_user)
