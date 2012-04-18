@@ -1,5 +1,5 @@
 <?php
-function show_form() {
+function show_form($email, $keyid, $secret) {
 ?>
 <!--
 <ul>
@@ -9,15 +9,19 @@ function show_form() {
 -->
 
 <form method="post">
-Access Key ID: <input type="text" name="keyid" /><br />
-Secret Access Key: <input type="text" name="secret" /><br />
+Email Address: <input type="text" name="email" value="<?php print $email;?>" /><br />
+Password: <input type="password" name="pass" /><br />
+Password Again: <input type="password" name="pass2" /><br />
+Access Key ID: <input type="text" name="keyid" value="<?php print $keyid;?>" /><br />
+Secret Access Key: <input type="text" name="secret" value="<?php print $secret;?>" /><br />
+<input type="hidden" name="form" value="1"/><br />
 <input type="submit" value="Give me a sandbox server now" />
 </form>
 <?php
 }
 
 function clean_string($str) {
-    return preg_replace("|[^A-Za-z0-9+/]|", "", $str);
+    return preg_replace("|[^A-Za-z0-9@+/.,_-]|", "", $str);
 }
 
 function post($str) {
@@ -29,12 +33,53 @@ function post($str) {
 <html>
 <body>
 <?php
-if (isset($_POST['keyid']) && isset($_POST['secret'])) {
+$bad = false;
+if (!isset($_POST['form'])) {
+    $bad = true;
+    $email = $keyid = $secret = '';
+} else {
+    $email = post('email');
+    $pass = post('pass');
+    $pass2 = post('pass2');
     $keyid = post('keyid');
     $secret = post('secret');
+
+    if ($email == '') {
+        print "you didn't specify your email address<br/>\n";
+        $bad = true;
+    }
+
+    if ($pass == '') {
+        print "you didn't specify a password to use for the instance<br/>\n";
+        $bad = true;
+    } else if ($pass2 == '') {
+        print "you didn't specify your password a 2nd time<br/>\n";
+        $bad = true;
+    } else if ($_POST['pass'] != $_POST['pass2']) {
+        print "the two passwords don't match<br/>\n";
+        $bad = true;
+    } else if ($pass != $_POST['pass']) {
+        print "the password should only contain A-Z, a-z, 0-9, and any of @+/.,_-<br/>\n";
+        $bad = true;
+    }
+
+    if ($keyid == '') {
+        print "you didn't specify your AWS key id<br/>\n";
+        $bad = true;
+    }
+
+    if ($secret == '') {
+        print "you didn't specify your AWS secret<br/>\n";
+        $bad = true;
+    }
+}
+
+if ($bad) {
+    print "<br/>\n";
+    show_form($email, $keyid, $secret);
+} else {
     chdir("/var/www/openorg-aws-setup/");
-    $command = "python aws.py $keyid $secret 2>&1";
-    # $command = "./script.sh";
+    $command = "python aws.py --admin-email $email --aws-root-pw $pass --task lampcms --task sshd $keyid $secret 2>&1";
     print "setting up sandbox server.<br />it takes a couple of minutes to create a new instance, then shows output in real time:<br />\n";
     ob_flush(); flush(); 
     $fp = popen($command, 'r');
@@ -57,8 +102,6 @@ if (isset($_POST['keyid']) && isset($_POST['secret'])) {
     print "done.<br />\n";
     if ($url)
         print "new server is up at <a href=\"$url\">$url</a>.<br />\n";
-} else {
-    show_form();
 }
 ?>
 </body>
