@@ -8,11 +8,6 @@ def replace_in_config_ini(before, after):
     replace_in_file('/var/www/!config.ini', before, after)
 
 def run(aws):
-    # install pdo_mysql PHP extension if it isn't already installed (lib* because it's either in /usr/lib/ or /usr/lib64/)
-    op.run('sudo yum -y install mysql-devel php-pdo')
-    op.run('[ -f /usr/lib*/php/modules/pdo_mysql.so ] || sudo pecl install pdo_mysql')
-    op.run('echo "extension=pdo_mysql.so" | sudo tee /etc/php.d/pdo_mysql.ini > /dev/null')
-
     # create LampCMS database in Mysql
     op.run('echo Creating LampCMS database ...')
     input = ('create database LAMPCMS; ' +
