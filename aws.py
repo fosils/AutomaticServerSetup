@@ -96,16 +96,23 @@ class aws_tool(object):
         self.generate_key()
         self.generate_sec_group()
         ami =  self.ec2.get_all_images([self.ami_name])[0]
+        sys.stdout.write("Setting up new AWS instance: ")
         self.reservation = ami.run(key_name=self.keyname,
                                    instance_type=self.instance_size,
                                    security_groups=[self.group])
         self.reservation = self.reservation.instances[0]
         while self.reservation.update() != u'running':
+            sys.stdout.write('.')
+            sys.stdout.flush()
             time.sleep(1)
-        print 'AWS instance set up at', self.reservation.public_dns_name        
+
         self.hostname = self.reservation.public_dns_name
         fabric.api.env.host_string = 'ec2-user@%s' % self.reservation.public_dns_name
         fabric.api.env.key_filename = self.key_directory + self.keyname +'.pem'
+        print("\n  NOTE: you can reconnect to this instance later by specifying flags:\n    --keyfile %s --host %s" %
+              (fabric.api.env.key_filename, self.reservation.public_dns_name))
+        print("\n  NOTE: you can log in to this instance by running:\n    ssh -i %s %s\n" %
+              (fabric.api.env.key_filename, fabric.api.env.host_string))
         aws.run_task('wait_for_boot')
 
     def use_existing_instance(self, host_string, key_filename):
