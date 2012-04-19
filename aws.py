@@ -105,6 +105,7 @@ class aws_tool(object):
             sys.stdout.write('.')
             sys.stdout.flush()
             time.sleep(1)
+        print
 
         self.hostname = self.reservation.public_dns_name
         fabric.api.env.host_string = 'ec2-user@%s' % self.reservation.public_dns_name
