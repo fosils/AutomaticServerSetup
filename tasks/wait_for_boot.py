@@ -8,7 +8,7 @@ def run(aws):
     while True:
         time.sleep(10)
         try:
-            op.run('echo "ready?"')
+            op.run('echo -n "ready?"')
             break
         except NetworkError:
             pass
