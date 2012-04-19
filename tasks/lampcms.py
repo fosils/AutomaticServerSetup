@@ -11,7 +11,7 @@ def run(aws):
     aws.run_task('setup_python')
     aws.run_task('install_git')
     aws.run_task('install_mongodb_for_php')
-    aws.run_task('install_mysql')
+    aws.run_task('install_mysql_for_php')
 
     aws.run_task('lampcms_nodeps')
 
