@@ -92,6 +92,12 @@ class aws_tool(object):
         self.group.authorize(ip_protocol='tcp', from_port='22', to_port='22', cidr_ip='0.0.0.0/0')
         self.group.authorize(ip_protocol='tcp', from_port='80', to_port='80', cidr_ip='0.0.0.0/0')
 
+    def show_credentials(self):
+        print("\n  NOTE: you can reconnect to this instance later by specifying flags:\n    --keyfile %s --host %s" %
+              (fabric.api.env.key_filename, self.hostname))
+        print("\n  NOTE: you can log in to this instance by running:\n    ssh -i %s %s\n" %
+              (fabric.api.env.key_filename, fabric.api.env.host_string))
+
     def start_instance(self):
         self.generate_key()
         self.generate_sec_group()
@@ -108,19 +114,16 @@ class aws_tool(object):
         print
 
         self.hostname = self.reservation.public_dns_name
-        fabric.api.env.host_string = 'ec2-user@%s' % self.reservation.public_dns_name
+        fabric.api.env.host_string = 'ec2-user@%s' % self.hostname
         fabric.api.env.key_filename = self.key_directory + self.keyname +'.pem'
-        print("\n  NOTE: you can reconnect to this instance later by specifying flags:\n    --keyfile %s --host %s" %
-              (fabric.api.env.key_filename, self.reservation.public_dns_name))
-        print("\n  NOTE: you can log in to this instance by running:\n    ssh -i %s %s\n" %
-              (fabric.api.env.key_filename, fabric.api.env.host_string))
+        self.show_credentials()
         aws.run_task('wait_for_boot')
 
     def use_existing_instance(self, host_string, key_filename):
         # if they included the 'ec2-user@' prefix, remove it
         host_string = string.split(host_string, '@')[-1]
         fabric.api.env.host_string = 'ec2-user@%s' % host_string
-        fabric.api.env.key_filename = self.key_directory + key_filename
+        fabric.api.env.key_filename = key_filename
         self.hostname = host_string
         
     def run_task(self, task, force = False):
@@ -148,3 +151,5 @@ if __name__ == '__main__':
         aws.run_tasks(aws.options.task)
     else:
         aws.run_tasks(['lampcms', 'qanda'])
+
+    aws.show_credentials()
