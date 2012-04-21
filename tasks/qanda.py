@@ -13,7 +13,6 @@ def run(aws):
     aws.run_task('setup_python')
     aws.run_task('install_apache')
     aws.run_task('install_php')
-    aws.run_task('install_mysql')
 
     # download QandA package
     op.run('echo Downloading QandA package ...')
