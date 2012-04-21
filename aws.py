@@ -150,6 +150,6 @@ if __name__ == '__main__':
     if (aws.options.task):
         aws.run_tasks(aws.options.task)
     else:
-        aws.run_tasks(['lampcms', 'qanda'])
+        aws.run_tasks(['lampcms'])
 
     aws.show_credentials()
