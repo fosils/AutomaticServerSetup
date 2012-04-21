@@ -16,7 +16,7 @@ from optparse import OptionParser
 #    aws.py -h		will show all available command line parameters
 
 # AWS instance root password
-aws_root_pw = 'pleasechangethispassword755'
+aws_root_pw = 'pleasechangethispassword912'
 
 # Mysql root password
 mysql_root_pw = 'root'
