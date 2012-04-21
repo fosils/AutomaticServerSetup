@@ -32,7 +32,7 @@ host = ''
 keyfile = ''
 aws_key_id = ''
 aws_secret = ''
-region = 'eu-west-1'
+region = 'us-east-1'
 
 class aws_tool(object):
     '''
@@ -43,7 +43,7 @@ class aws_tool(object):
     key_directory = './'
     scripts_dir = './scripts/'
     instance_size = 't1.micro'
-    ami_name = 'ami-f9231b8d' # Amazon Linux AMI 2012.03, x86_64
+    ami_name = 'ami-e565ba8c' # Amazon Linux AMI 2012.03, x86_64
 
     def __init__(self, region):
         self.parse_options()
