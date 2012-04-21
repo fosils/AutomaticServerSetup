@@ -115,7 +115,7 @@ class aws_tool(object):
                 break
             sys.stdout.write('.')
             sys.stdout.flush()
-        time.sleep(5)
+        time.sleep(2)
         print
 
         self.hostname = self.reservation.public_dns_name
