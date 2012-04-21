@@ -95,8 +95,10 @@ class aws_tool(object):
     def show_credentials(self):
         print("\n  NOTE: you can reconnect to this instance later by specifying flags:\n    --keyfile %s --host %s" %
               (fabric.api.env.key_filename, self.hostname))
-        print("\n  NOTE: you can log in to this instance by running:\n    ssh -i %s %s\n" %
+        print("\n  NOTE: you can log in to this instance by running:\n    ssh -i %s %s" %
               (fabric.api.env.key_filename, fabric.api.env.host_string))
+        print("\n  NOTE: if the instance is serving a web page, you can view it here:\n    http://%s/\n" %
+              (self.hostname,))
 
     def start_instance(self):
         self.generate_key()
