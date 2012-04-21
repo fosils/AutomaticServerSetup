@@ -22,5 +22,5 @@ def run(aws):
 
         # install QA
         op.run('echo Installing QA-website')
-        op.run('sudo mv -f dkode-QA-* qanda')
-        # op.run('sudo rmdir dkode-QA-*')
+        op.run('sudo mv -f dkode-QA-*/* ./')
+        op.run('sudo rmdir dkode-QA-*')
