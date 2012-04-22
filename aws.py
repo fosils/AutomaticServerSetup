@@ -110,12 +110,11 @@ class aws_tool(object):
                                    security_groups=[self.group])
         self.reservation = self.reservation.instances[0]
         while True:
-            time.sleep(2)
+            time.sleep(3)
             if (self.reservation.update() == u'running'):
                 break
             sys.stdout.write('.')
             sys.stdout.flush()
-        time.sleep(2)
         print
 
         self.hostname = self.reservation.public_dns_name
