@@ -10,5 +10,5 @@ def run(aws):
         op.run("wget -o/dev/null https://abucketineurope.s3.amazonaws.com/sshd_config")
         op.run("sudo mv -f sshd_config /etc/ssh/")
 
-    # restart sshd
+    # restart sshd - if we don't sleep after doing this, sshd ends up dead for some reason I don't really understand
     op.run("sudo service sshd restart; sleep 1")
