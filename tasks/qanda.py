@@ -23,3 +23,4 @@ def run(aws):
         op.run('echo Installing QA-website')
         op.run('sudo mv -f dkode-QA-*/* ./')
         op.run('sudo rmdir dkode-QA-*')
+        op.run('service httpd restart')
