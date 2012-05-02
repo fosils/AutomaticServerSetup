@@ -134,7 +134,11 @@ class aws_tool(object):
         # only run each task once, unless force==True
         if (force or not self.tasks.has_key(task)):
             self.tasks[task] = True
-            a = __import__('tasks.%s' % (task),None,None,'run')
+            try:
+                a = __import__('tasks.%s' % (task),None,None,'run')
+            except ImportError:
+                print "Can't import task '%s': %s" % (task, sys.exc_info()[1])
+                sys.exit(1)
             a.run(self)
         else:
             print "skipping task '%s' because it was already run" % task
