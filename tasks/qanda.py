@@ -17,10 +17,10 @@ def run(aws):
     # download QandA package
     op.run('echo Downloading QandA package ...')
     with cm.cd('/var/www/html'):
-        op.run('wget -qO - https://github.com/dkode/QA-website/tarball/master | sudo tar -xz')
+        op.run('wget -qO - https://github.com/fosils/QA-website/tarball/master | sudo tar -xz')
 
         # install QA
         op.run('echo Installing QA-website')
-        op.run('sudo mv -f dkode-QA-*/* ./')
-        op.run('sudo rmdir dkode-QA-*')
+        op.run('sudo mv -f fosils-QA-*/* ./')
+        op.run('sudo rmdir fosils-QA-*')
         op.run('service httpd restart')
