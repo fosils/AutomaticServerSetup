@@ -43,6 +43,7 @@ def run(aws):
         op.run('sudo rm -fr openorg-aws-setup')
         op.run('sudo git clone git://github.com/fosils/openorg-aws-setup.git')
         op.run('sudo mv openorg-aws-setup/startsandbox.php /var/www/html/')
+        op.run('sudo mv openorg-aws-setup/startsandbox-qanda.php /var/www/html/')
         op.run('sudo chown apache openorg-aws-setup/')
 
     # configure LampCMS (config_lampcms.sh)
