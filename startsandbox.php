@@ -12,8 +12,8 @@ function show_form($email, $keyid, $secret) {
 Email Address: <input type="text" name="email" value="<?php print $email;?>" /><br />
 SSH root password: <input type="password" name="pass" /><br />
 SSH root password again: <input type="password" name="pass2" /><br />
-Access Key ID: <input type="text" name="keyid" value="<?php print $keyid;?>" /><br />
-Secret Access Key: <input type="text" name="secret" value="<?php print $secret;?>" /><br />
+Amazon Access Key ID: <input type="text" name="keyid" value="<?php print $keyid;?>" /><br />
+Amazon Secret Access Key: <input type="text" name="secret" value="<?php print $secret;?>" /><br />
 <input type="hidden" name="form" value="1"/><br />
 <input type="submit" value="Give me a sandbox server now" />
 </form>
