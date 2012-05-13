@@ -10,8 +10,8 @@ function show_form($email, $keyid, $secret) {
 
 <form method="post">
 Email Address: <input type="text" name="email" value="<?php print $email;?>" /><br />
-Password: <input type="password" name="pass" /><br />
-Password Again: <input type="password" name="pass2" /><br />
+SSH root password: <input type="password" name="pass" /><br />
+SSH root password again: <input type="password" name="pass2" /><br />
 Access Key ID: <input type="text" name="keyid" value="<?php print $keyid;?>" /><br />
 Secret Access Key: <input type="text" name="secret" value="<?php print $secret;?>" /><br />
 <input type="hidden" name="form" value="1"/><br />
@@ -101,7 +101,7 @@ if ($bad) {
     print "</pre>\n";
     print "done.<br />\n";
     if ($url)
-        print "new server is up at <a href=\"$url\">$url</a>.<br />\n";
+        print "new server is up at <a href=\"$url\">$url</a>. You can either access the server via the browser or SSH using the password you provided.<br />\n";
 }
 ?>
 </body>
